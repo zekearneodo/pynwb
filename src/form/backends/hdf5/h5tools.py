@@ -11,6 +11,7 @@ from form.data_utils import DataChunkIterator, get_shape
 from form.build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
 from form.spec import RefSpec, DtypeSpec
 from ..io import FORMIO
+from ..dataio import DataIO
 
 ROOT_NAME = 'root'
 
@@ -363,10 +364,18 @@ class HDF5IO(FORMIO):
             return tuple([self.__selection_max_bounds__(i) for i in selection])
 
     def __scalar_fill__(self, parent, name, data, dtype=None):
-        if not isinstance(dtype, type):
-            dtype = self.__resolve_dtype__(dtype, data)
+        this_data = data
+        this_compress = False
+        if isinstance(data, DataIO):
+            this_data = data.getdata()
+            this_compress = data.getcompress()
+        if not isinstance(dtype, type):            
+            dtype = self.__resolve_dtype__(dtype, this_data)            
         try:
-            dset = parent.create_dataset(name, data=data,shape=None, dtype=dtype)
+            if this_compress:
+                dset = parent.create_dataset(name, data=this_data,shape=None, dtype=dtype, compression="gzip")
+            else:
+                dset = parent.create_dataset(name, data=this_data,shape=None, dtype=dtype)
         except Exception as exc:
             msg = "Could not create scalar dataset %s in %s" % (name, parent.name)
             raise_from(Exception(msg), exc)
