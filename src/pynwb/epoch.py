@@ -2,8 +2,9 @@ import copy
 import numpy as np
 from bisect import bisect_left
 
-from form.utils import docval, getargs, call_docval_func, fmt_docval_args
-from form.backends.dataio import DataIO 
+from .form.utils import docval, getargs, call_docval_func, fmt_docval_args
+from .form.backends.dataio import DataIO
+
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer
@@ -151,7 +152,7 @@ class Epoch(NWBContainer):
         self._timeseries[name] = EpochTimeSeries(self.source, timeseries, idx, count, name=name,parent=self)
         return self._timeseries[name]
 
-    def __calculate_idx_count(self, start_time, stop_time, ts_data):        
+    def __calculate_idx_count(self, start_time, stop_time, ts_data):
         if isinstance(ts_data.timestamps, DataIO):
             ts_timestamps = ts_data.timestamps.getdata()
             ts_starting_time = ts_data.starting_time
