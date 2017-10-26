@@ -4,6 +4,7 @@ import copy as _copy
 import itertools as _itertools
 import posixpath as _posixpath
 from abc import ABCMeta
+from collections import Iterable
 
 from ..utils import docval, getargs, call_docval_func, fmt_docval_args
 from six import with_metaclass
@@ -191,7 +192,7 @@ class GroupBuilder(BaseBuilder):
             builder.parent = self
 
     @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
-            {'name':'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
+            {'name':'data', 'type': ('array_data', 'scalar_data', 'data', 'DatasetBuilder', Iterable), 'doc': 'the data to write to this dataset', 'default': None},
             {'name':'dtype', 'type': (type, np.dtype, str, list), 'doc': 'the datatype of this dataset', 'default': None},
             {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name':'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
@@ -354,7 +355,7 @@ class DatasetBuilder(BaseBuilder):
     REGION_REF_TYPE = 'region'
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'data', 'type': None, 'doc': 'the data in this dataset', 'default': None},
+            {'name': 'data', 'type': ('array_data', 'scalar_data', 'data', 'DatasetBuilder', Iterable), 'doc': 'the data in this dataset', 'default': None},
             {'name': 'dtype', 'type': (type, np.dtype, str, list), 'doc': 'the datatype of this dataset', 'default': None},
             {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name': 'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
