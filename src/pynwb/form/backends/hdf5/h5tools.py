@@ -8,12 +8,11 @@ from functools import partial
 from ...container import Container
 
 from ...utils import docval, getargs, popargs
-from ...data_utils import DataChunkIterator, get_shape
+from ...data_utils import DataChunkIterator, get_shape, DataIO
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
 from ...spec import RefSpec, DtypeSpec
 
 from ..io import FORMIO
-from ..dataio import DataIO
 
 ROOT_NAME = 'root'
 
