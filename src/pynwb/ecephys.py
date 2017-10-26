@@ -61,7 +61,7 @@ class ElectrodeTable(NWBTable):
     '''A table of all electrodes'''
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': Iterable, 'doc': 'the source of the data', 'default': list()})
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
     def __init__(self, **kwargs):
         data, name = getargs('data', 'name', kwargs)
         colnames = [i['name'] for i in _et_docval]
@@ -105,14 +105,14 @@ class ElectricalSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
             {'name': 'electrodes', 'type': ElectrodeTableRegion, 'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
@@ -149,8 +149,8 @@ class SpikeEventSeries(ElectricalSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'doc': 'Timestamps for samples stored in data'},
             {'name': 'electrodes', 'type': ElectrodeTableRegion, 'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
@@ -191,8 +191,8 @@ class EventDetection(NWBContainer):
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'detection_method', 'type': str, 'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, as well as relevant values.'},
             {'name': 'source_electricalseries', 'type': ElectricalSeries, 'doc': 'The source electrophysiology data'},
-            {'name': 'source_idx', 'type': Iterable, 'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding to time of event. Module description should define what is meant by time of event (e.g., .25msec before action potential peak, zero-crossing time, etc). The index points to each event from the raw data'},
-            {'name': 'times', 'type': Iterable, 'doc': 'Timestamps of events, in Seconds'},
+            {'name': 'source_idx', 'type': ('array_data', 'data'), 'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding to time of event. Module description should define what is meant by time of event (e.g., .25msec before action potential peak, zero-crossing time, etc). The index points to each event from the raw data'},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'})
     def __init__(self, **kwargs):
         source, detection_method, source_electricalseries, source_idx, times = popargs('source', 'detection_method', 'source_electricalseries', 'source_idx', 'times', kwargs)
@@ -240,9 +240,9 @@ class Clustering(NWBContainer):
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, clusters curated using Klusters, etc).'},
-            {'name': 'num', 'type': Iterable, 'doc': 'Cluster number of each event.'},
+            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.'},
             {'name': 'peak_over_rms', 'type': Iterable, 'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster(provides a basic clustering metric).'},
-            {'name': 'times', 'type': Iterable, 'doc': 'Times of clustered events, in seconds.'},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
         source, description, num, peak_over_rms, times = popargs('source', 'description', 'num', 'peak_over_rms', 'times', kwargs)
@@ -349,8 +349,8 @@ class FeatureExtraction(NWBContainer):
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data'},
             {'name': 'electrodes', 'type': ElectrodeTableRegion, 'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'A description for each feature extracted', 'ndim': 1},
-            {'name': 'times', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'The times of events that features correspond to', 'ndim': 1},
-            {'name': 'features', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'Features for each channel', 'ndim': 3},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'The times of events that features correspond to', 'ndim': 1},
+            {'name': 'features', 'type': ('array_data', 'data'), 'doc': 'Features for each channel', 'ndim': 3},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'})
     def __init__(self, **kwargs):
         # get the inputs

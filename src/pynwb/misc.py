@@ -29,8 +29,8 @@ class AnnotationSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': list()},
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': list()},
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
 
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
@@ -77,11 +77,11 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'feature_units', 'type': str, 'doc': 'The unit of each feature'},
             {'name': 'features', 'type': str, 'doc': 'Description of each feature'},
 
-            {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': list()},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': list()},
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
@@ -124,9 +124,9 @@ class IntervalSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': list()},
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': list()},
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':  'no comments'},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':  'no description'},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
@@ -174,7 +174,7 @@ class SpikeUnit(NWBContainer):
     _help = "Estimated spike times from a single unit"
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of the SpikeUnit'},
-            {'name': 'times', 'type': Iterable, 'doc': 'Spike time for the units (exact or estimated)'},
+            {'name': 'times', 'type': ('array_data', 'data', TimeSeries), 'doc': 'Spike time for the units (exact or estimated)'},
             {'name': 'unit_description', 'type': str, 'doc': 'Description of the unit (eg, cell type).'},
             {'name': 'source', 'type': str, 'doc': 'Name, path or description of where unit times originated. This is necessary only if the info here differs from or is more fine-grained than the interfaces source field.'})
     def __init__(self, **kwargs):
