@@ -6,6 +6,19 @@ from abc import ABCMeta
 import six
 from six import raise_from
 import numpy as np
+import h5py
+
+__macros = {
+    'array_data': [np.ndarray, list, tuple, h5py.Dataset],
+}
+
+def docval_macro(macro):
+    def _dec(cls):
+        if macro not in __macros:
+            __macros[macro] = list()
+        __macros[macro].append(cls)
+        return cls
+    return _dec
 
 def __type_okay(value, argtype, allow_none=False):
     """Check a value against a type
@@ -26,7 +39,10 @@ def __type_okay(value, argtype, allow_none=False):
     if value is None:
         return allow_none
     if isinstance(argtype, str):
-        if argtype is 'int':
+        if argtype in __macros:
+            print('FOUND MACRO')
+            return __type_okay(value, __macros[argtype], allow_none=allow_none)
+        elif argtype is 'int':
             return __is_int(value)
         elif argtype is 'float':
             return __is_float(value)
@@ -222,6 +238,26 @@ def get_docval_kwargs(func):
     else:
         return tuple()
 
+def __resolve_macros(t):
+    if t is None:
+        return t
+    if isinstance(t, str):
+        if t in __macros:
+            return tuple(__macros[t])
+        else:
+            return t
+    elif isinstance(t, type):
+        return t
+    else:
+        ret = list()
+        for i in t:
+            resolved = __resolve_macros(i)
+            if isinstance(resolved, tuple):
+                ret.extend(resolved)
+            else:
+                ret.append(resolved)
+        return tuple(ret)
+
 def docval(*validator, **options):
     '''A decorator for documenting and enforcing type for instance method arguments.
 
@@ -267,11 +303,13 @@ def docval(*validator, **options):
     rtype = options.pop('rtype', None)
     is_method = options.pop('is_method', True)
     val_copy = __sort_args(_copy.deepcopy(validator))
+
     def dec(func):
         _docval = _copy.copy(options)
         pos = list()
         kw = list()
         for a in val_copy:
+            a['type'] = __resolve_macros(a['type'])
             if 'default' in a:
                 kw.append(a)
             else:
