@@ -36,6 +36,14 @@ def get_type_map():
     ret = copy(__TYPE_MAP)
     return ret
 
+@docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the spec for'},
+        {'name': 'namespace', 'type': str, 'doc': 'the name of the namespace', 'default': CORE_NAMESPACE},
+        is_method=False,
+        returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
+def get_spec(**kwargs):
+    namespace, data_type = getargs('namespace', 'data_type', kwargs)
+    return __NS_CATALOG.get_spec(namespace, data_type)
+
 @docval({'name': 'extensions', 'type': (str, TypeMap, list), 'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps', 'default': None},
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
