@@ -168,7 +168,7 @@ _attrbl_args = [
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'data_type_inc', 'type': 'BaseStorageSpec', 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'data_type_inc', 'type': (str, 'BaseStorageSpec'), 'doc': 'the NWB type this specification extends', 'default': None},
 ]
 class BaseStorageSpec(Spec):
     ''' A specification for any object that can hold attributes. '''
@@ -199,24 +199,38 @@ class BaseStorageSpec(Spec):
             self['quantity'] = quantity
         if not linkable:
             self['linkable'] = False
-        resolve = False
-        if data_type_inc is not None:
-            if isinstance(data_type_inc, BaseStorageSpec):
-                self[self.inc_key()] = data_type_inc.data_type_def
-            else:
-                self[self.inc_key()] = data_type_inc
+
+        self.__new_attributes = set()
+        for attribute in attributes:
+            self.set_attribute(attribute)
+            self.__new_attributes.add(attribute.name)
         if data_type_def is not None:
             self.pop('required', None)
             self[self.def_key()] = data_type_def
-            if data_type_inc is not None and isinstance(data_type_inc, BaseStorageSpec):
-                resolve = True
-        for attribute in attributes:
-            self.set_attribute(attribute)
-        self.__new_attributes = set(self.__attributes.keys())
-        self.__resolved = False
-        if resolve:
-            self.resolve_spec(data_type_inc)
-            self.__resolved = True
+        self.__data_type_inc = None
+        if data_type_inc is not None:
+            if data_type_def is None:
+                if isinstance(data_type_inc, BaseStorageSpec):
+                    self[self.inc_key()] = data_type_inc.data_type_def
+                    self.__data_type_inc = data_type_inc
+                else:
+                    self[self.inc_key()] = data_type_inc
+            else:
+                if isinstance(data_type_inc, BaseStorageSpec):
+                    self[self.inc_key()] = data_type_inc.data_type_def
+                    self.resolve_spec(data_type_inc)
+                    self.__data_type_inc = data_type_inc
+                else:
+                    raise ValueError('Must provide parent spec object when extending')
+
+
+    @docval({'name': 'inc_spec', 'type': 'BaseStorageSpec', 'doc': 'the data type this specification represents'})
+    def resolve_spec(self, **kwargs):
+        inc_spec = getargs('inc_spec', kwargs)
+        for attribute in inc_spec.attributes:
+            self.__new_attributes.discard(attribute)
+            if attribute.name not in self.__attributes:
+                self.__attributes[attribute.name] = attribute
 
     @property
     def default_name(self):
@@ -224,22 +238,10 @@ class BaseStorageSpec(Spec):
         return self.get('default_name', None)
 
     @property
-    def resolved(self):
-        return self.__resolved
-
-    @property
     def required(self):
         ''' Whether or not the this spec represents a required field '''
         return self.quantity not in (ZERO_OR_ONE, ZERO_OR_MANY)
 
-    @docval({'name': 'inc_spec', 'type': 'BaseStorageSpec', 'doc': 'the data type this specification represents'})
-    def resolve_spec(self, **kwargs):
-        inc_spec = getargs('inc_spec', kwargs)
-        for attribute in inc_spec.attributes:
-            self.__new_attributes.discard(attribute)
-            if attribute.name in self.__attributes:
-                continue
-            self.set_attribute(attribute)
 
     @docval({'name': 'spec', 'type': (Spec, str), 'doc': 'the specification to check'})
     def is_inherited_spec(self, **kwargs):
@@ -271,7 +273,8 @@ class BaseStorageSpec(Spec):
     @property
     def attributes(self):
         ''' The attributes for this specification '''
-        return tuple(self.get('attributes', tuple()))
+        #return tuple(self.get('attributes', tuple()))
+        return tuple(self.__attributes.values()) # TODO: do this for datasets, groups, links, etc
 
     @property
     def linkable(self):
@@ -351,7 +354,11 @@ class BaseStorageSpec(Spec):
     def get_attribute(self, **kwargs):
         ''' Get an attribute on this specification '''
         name = getargs('name', kwargs)
-        return self.__attributes.get(name)
+        ret = self.__attributes.get(name)
+        if ret is None:
+            if self.__data_type_inc is not None:
+                ret = self.__data_type_inc.get_attribute(name)
+        return ret
 
     @classmethod
     def build_const_args(cls, spec_dict):
@@ -671,7 +678,7 @@ class GroupSpec(BaseStorageSpec):
             if dataset.name in self.__datasets:
                 self.__datasets[dataset.name].resolve_spec(dataset)
             else:
-                self.set_dataset(dataset)
+                self.__datasets[dataset.name] = dataset
         # resolve inherited groups
         for group in inc_spec.groups:
             #if not (group.data_type_def is None and group.data_type_inc is None):
@@ -682,16 +689,15 @@ class GroupSpec(BaseStorageSpec):
             if group.name in self.__groups:
                 self.__groups[group.name].resolve_spec(group)
             else:
-                self.set_group(group)
+                self.__groups[group.name] = group
         # resolve inherited links
         for link in inc_spec.links:
             if link.data_type_inc is not None:
                 data_types.append(link)
                 continue
             self.__new_links.discard(link.name)
-            if link.name in self.__links:
-                continue
-            self.set_link(link)
+            if link.name not in self.__links:
+                self.__links[link.name] = link
         # resolve inherited data_types
         for dt_spec in data_types:
             dt = getattr(dt_spec, 'data_type_def',
@@ -772,7 +778,7 @@ class GroupSpec(BaseStorageSpec):
             if spec.data_type_def is None:
                 raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
             spec = spec.data_type_def
-        #return spec.data_type_def in self.__inherited_data_type_defs
+        #return spec.data_type_def in self.__inherited_data_type_defs #TODO: remove this line
         return spec not in self.__new_data_types
 
     def __add_data_type_inc(self, spec):
@@ -798,17 +804,17 @@ class GroupSpec(BaseStorageSpec):
     @property
     def groups(self):
         ''' The groups specificed in this GroupSpec '''
-        return tuple(self.get('groups', tuple()))
+        return tuple(self.__groups.values())
 
     @property
     def datasets(self):
         ''' The datasets specificed in this GroupSpec '''
-        return tuple(self.get('datasets', tuple()))
+        return tuple(self.__datasets.values())
 
     @property
     def links(self):
         ''' The links specificed in this GroupSpec '''
-        return tuple(self.get('links', tuple()))
+        return tuple(self.__links.values())
 
     @docval(*deepcopy(_group_args))
     def add_group(self, **kwargs):
