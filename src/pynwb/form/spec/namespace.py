@@ -280,7 +280,7 @@ class NamespaceCatalog(object):
             ret = tuple(l)
         return ret
 
-    def __load_spec_file(self, reader, spec_source, catalog, dtypes=None, resolve=True):
+    def __load_spec_file(self, reader, spec_source, catalog, dtypes=None):
         ret = self.__loaded_specs.get(spec_source)
         def __reg_spec(spec_cls, spec_dict):
             dt_def = spec_dict.get(spec_cls.def_key())
@@ -290,8 +290,7 @@ class NamespaceCatalog(object):
                 return
             if dtypes and dt_def not in dtypes:
                 return
-            if resolve:
-                self.__resolve_includes(spec_dict, catalog)
+            self.__resolve_includes(spec_dict, catalog)
             spec_obj = spec_cls.build_spec(spec_dict)
             return catalog.auto_register(spec_obj, spec_source)
         if ret is None:
@@ -326,12 +325,11 @@ class NamespaceCatalog(object):
         return modified
 
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
-            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
             {'name': 'reader', 'type': SpecReader, 'doc': 'the class to user for reading specifications', 'default': None},
             returns='a dictionary describing the dependencies of loaded namespaces', rtype=dict)
     def load_namespaces(self, **kwargs):
         """Load the namespaces in the given file"""
-        namespace_path, resolve, reader = getargs('namespace_path', 'resolve', 'reader', kwargs)
+        namespace_path, reader = getargs('namespace_path', 'reader', kwargs)
         if reader is None:
             reader = YAMLSpecReader(indir=os.path.dirname(namespace_path))
         # load namespace definition from file
@@ -354,7 +352,7 @@ class NamespaceCatalog(object):
                     dtypes = None
                     if types_key in s:
                         dtypes = set(s[types_key])
-                    ndts = self.__load_spec_file(reader, s['source'], catalog, dtypes=dtypes, resolve=resolve)
+                    ndts = self.__load_spec_file(reader, s['source'], catalog, dtypes=dtypes)
                     self.__included_sources.setdefault(ns['name'], list()).append(s['source'])
                 elif 'namespace' in s:
                     # load specs from namespace

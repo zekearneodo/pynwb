@@ -571,6 +571,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         ''' Construct an Container from the given Builder '''
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
+        es = False
         # gather all subspecs
         subspecs = self.__get_subspec_values(builder, self.spec, manager)
         # get the constructor argument each specification corresponds to
@@ -673,7 +674,6 @@ class TypeMap(object):
             self.register_map(container_cls, type_map.__mapper_cls[container_cls])
 
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
-            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
             returns="the namespaces loaded from the given file", rtype=tuple)
     def load_namespaces(self, **kwargs):
         '''Load namespaces from a namespace file.
@@ -682,8 +682,8 @@ class TypeMap(object):
         it will process the return value to keep track of what types were included in the loaded namespaces. Calling
         load_namespaces here has the advantage of being able to keep track of type dependencies across namespaces.
         '''
-        namespace_path, resolve = getargs('namespace_path', 'resolve', kwargs)
-        deps = self.__ns_catalog.load_namespaces(namespace_path, resolve)
+        namespace_path = getargs('namespace_path', kwargs)
+        deps = self.__ns_catalog.load_namespaces(namespace_path)
         for new_ns, ns_deps in deps.items():
             for src_ns, types in ns_deps.items():
                 for dt in types:
