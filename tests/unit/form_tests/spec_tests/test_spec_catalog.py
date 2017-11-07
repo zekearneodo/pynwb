@@ -28,12 +28,12 @@ class SpecCatalogTest(unittest.TestCase):
     def test_hierarchy(self):
         spikes_spec = DatasetSpec('my extending dataset', 'int',
                                 namespace='core',
-                                data_type_inc='EphysData',
+                                data_type_inc=self.spec,
                                 data_type_def='SpikeData')
 
         lfp_spec = DatasetSpec('my second extending dataset', 'int',
                                 namespace='core',
-                                data_type_inc='EphysData',
+                                data_type_inc=self.spec,
                                 data_type_def='LFPData')
 
         self.catalog.register_spec(self.spec, 'test.yaml')

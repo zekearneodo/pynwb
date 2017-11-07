@@ -59,7 +59,7 @@ class TestSpecLoad(unittest.TestCase):
                             datasets=self.ext_datasets,
                             attributes=self.ext_attributes,
                             linkable=False,
-                            data_type_inc='EphysData',
+                            data_type_inc=self.spec,
                             data_type_def='SpikeData')
         to_dump = {'groups': [self.spec, self.ext_spec]}
         self.specs_path = 'test_load_namespace.specs.yaml'
@@ -86,7 +86,7 @@ class TestSpecLoad(unittest.TestCase):
             os.remove(self.specs_path)
 
     def test_inherited_attributes(self):
-        self.ns_catalog.load_namespaces(self.namespace_path, resolve=True)
+        self.ns_catalog.load_namespaces(self.namespace_path)
         ts_spec = self.ns_catalog.get_spec(self.NS_NAME, 'EphysData')
         es_spec = self.ns_catalog.get_spec(self.NS_NAME, 'SpikeData')
         ts_attrs = { s.name for s in ts_spec.attributes }
@@ -102,13 +102,3 @@ class TestSpecLoad(unittest.TestCase):
                 self.assertIn(dset, es_dsets)
         #self.assertSetEqual(ts_dsets, es_dsets)
 
-
-    def test_inherited_attributes_not_resolved(self):
-        self.ns_catalog.load_namespaces(self.namespace_path, resolve=False)
-        es_spec = self.ns_catalog.get_spec(self.NS_NAME, 'SpikeData')
-        src_attrs = { s.name for s in self.ext_attributes }
-        ext_attrs = { s.name for s in es_spec.attributes }
-        self.assertSetEqual(src_attrs, ext_attrs)
-        src_dsets = { s.name for s in self.ext_datasets }
-        ext_dsets = { s.name for s in es_spec.datasets }
-        self.assertSetEqual(src_dsets, ext_dsets)

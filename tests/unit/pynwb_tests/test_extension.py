@@ -3,7 +3,7 @@ import os
 from tempfile import gettempdir
 
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
-from pynwb import load_namespaces, get_class
+from pynwb import load_namespaces, get_class, get_spec
 
 
 class TestExtension(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestExtension(unittest.TestCase):
         ns_builder = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension")
         ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
                             attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
-                            neurodata_type_inc='ElectricalSeries',
+                            neurodata_type_inc=get_spec('ElectricalSeries'),
                             neurodata_type_def='TetrodeSeries')
         ns_builder.add_spec(self.ext_source, ext1)
         ns_builder.export(self.ns_path, outdir=self.tempdir)
@@ -58,14 +58,14 @@ class TestCatchDupNS(unittest.TestCase):
         ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1")
         ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
                             attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
-                            neurodata_type_inc='ElectricalSeries',
+                            neurodata_type_inc=get_spec('ElectricalSeries'),
                             neurodata_type_def='TetrodeSeries')
         ns_builder1.add_spec(self.ext_source1, ext1)
         ns_builder1.export(self.ns_path1, outdir=self.tempdir)
         ns_builder2 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1")
         ext2 = NWBGroupSpec('A custom ElectricalSeries for my lab',
                             attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
-                            neurodata_type_inc='ElectricalSeries',
+                            neurodata_type_inc=get_spec('ElectricalSeries'),
                             neurodata_type_def='TetrodeSeries')
         ns_builder2.add_spec(self.ext_source2, ext2)
         ns_builder2.export(self.ns_path2, outdir=self.tempdir)
