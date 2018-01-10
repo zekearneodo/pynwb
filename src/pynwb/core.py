@@ -100,6 +100,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
                 msg = "can't set attribute '%s' -- already set" % nwbfield
                 raise AttributeError(msg)
             self.fields[nwbfield] = val
+            if 'NWBBaseType' in val.__class__.__mro__:
+                set_parents(val, self)
         return _func
 
     @ExtenderMeta.pre_init
