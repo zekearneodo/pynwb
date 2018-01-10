@@ -7,6 +7,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
 from .core import NWBContainer
+from .ecephys import Device
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -48,12 +49,12 @@ class ImagingPlane(NWBContainer):
                      'unit',
                      'reference_frame')
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this imaging plane'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'optical_channel', 'type': (list, OpticalChannel),
              'doc': 'One of possibly many groups storing channelspecific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
-            {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
+            {'name': 'device', 'type': Device, 'doc': 'Name of device in /general/devices'},
             {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
             {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
