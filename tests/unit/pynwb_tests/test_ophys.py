@@ -3,6 +3,7 @@ import unittest
 from pynwb.ophys import TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, PlaneSegmentation, \
     ImageSegmentation, OpticalChannel, ImagingPlane, ROI
 from pynwb.image import ImageSeries
+from pynwb.ecephys import Device
 
 import numpy as np
 
@@ -22,8 +23,9 @@ def CreatePlaneSegmentation():
     roi_list = (roi1, roi2)
 
     oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 'emission_lambda')
+    d = Device('imaging_device', 'test device source')
     ip = ImagingPlane(
-        'test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
+        'test_imaging_plane', 'test_source', oc, 'description', d, 'excitation_lambda',
         'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
     ps = PlaneSegmentation('name', 'test source', 'description', roi_list, ip, iSS)
@@ -35,11 +37,12 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         oc = OpticalChannel('test_name', 'test_source', 'description', 'emission_lambda')
         self.assertEqual(oc.description, 'description')
         self.assertEqual(oc.emission_lambda, 'emission_lambda')
+        d = Device('imaging_device', 'test device source')
 
-        ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', 'device', 'excitation_lambda',
+        ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', d, 'excitation_lambda',
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
         self.assertEqual(ip.optical_channel[0], oc)
-        self.assertEqual(ip.device, 'device')
+        self.assertEqual(ip.device.name, 'imaging_device')
         self.assertEqual(ip.excitation_lambda, 'excitation_lambda')
         self.assertEqual(ip.imaging_rate, 'imaging_rate')
         self.assertEqual(ip.indicator, 'indicator')
@@ -119,7 +122,8 @@ class ImageSegmentationConstructor(unittest.TestCase):
         roi_list = (roi1, roi2)
 
         oc = OpticalChannel('test_optical_channel', 'test source', 'description', 'emission_lambda')
-        ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', 'device', 'excitation_lambda',
+        d = Device('imaging_device', 'test device source')
+        ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', d, 'excitation_lambda',
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
         ps = PlaneSegmentation('name', 'test source', 'description', roi_list, ip, iSS)
@@ -145,7 +149,8 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         roi_list = (roi1, roi2)
 
         oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 'emission_lambda')
-        ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
+        d = Device('imaging_device', 'test device source')
+        ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', d, 'excitation_lambda',
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
         iS = PlaneSegmentation('test_name', 'test source', 'description', roi_list, ip, iSS)
