@@ -93,14 +93,15 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
             return self.fields.get(nwbfield)
         return _func
 
-    @staticmethod
-    def __setter(nwbfield):
+    @classmethod
+    def __setter(cls,nwbfield):
         def _func(self, val):
             if nwbfield in self.fields:
                 msg = "can't set attribute '%s' -- already set" % nwbfield
                 raise AttributeError(msg)
             self.fields[nwbfield] = val
-            if 'NWBBaseType' in val.__class__.__mro__:
+            if 'NWBBaseType' in [c.__name__ for c in val.__class__.__mro__]:
+                print('HERE I AM')
                 set_parents(val, self)
         return _func
 
