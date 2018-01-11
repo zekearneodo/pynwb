@@ -9,7 +9,7 @@ from six import with_metaclass
 
 
 def set_parents(container, parent):
-    if isinstance(container, list):
+    if isinstance(container, Iterable):
         for c in container:
             if c.parent is None:
                 c.parent = parent
@@ -52,13 +52,11 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
             {'name': 'container_source', 'type': object,
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
-        parent, container_source = getargs('parent', 'container_source', kwargs)
-        super(NWBBaseType, self).__init__()
+        container_source = getargs('parent', 'container_source', kwargs)
+        super(NWBBaseType, self).__init__(parent)
         self.__fields = dict()
         self.__parent = None
         self.__name = getargs('name', kwargs)
-        if parent:
-            self.parent = parent
         self.__container_source = container_source
 
     @property
@@ -75,18 +73,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
     def fields(self):
         return self.__fields
 
-    @property
-    def parent(self):
-        '''The parent NWBContainer of this NWBContainer
-        '''
-        return self.__parent
-
-    @parent.setter
-    def parent(self, parent_container):
-        if self.__parent is not None:
-            raise Exception('cannot reassign parent')
-        self.__parent = parent_container
-
     @staticmethod
     def __getter(nwbfield):
         def _func(self):
@@ -100,9 +86,9 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
                 msg = "can't set attribute '%s' -- already set" % nwbfield
                 raise AttributeError(msg)
             self.fields[nwbfield] = val
-            if 'NWBBaseType' in [c.__name__ for c in val.__class__.__mro__]:
-                print('HERE I AM')
-                set_parents(val, self)
+#            if 'NWBBaseType' in [c.__name__ for c in val.__class__.__mro__]:
+#                print('HERE I AM')
+#                set_parents(val, self)
         return _func
 
     @ExtenderMeta.pre_init
@@ -150,6 +136,11 @@ class NWBContainer(NWBBaseType, Container):
                 assert i.name not in return_dict
                 return_dict[i.name] = i
             return return_dict
+
+    @docval({'name': 'container', 'type': (list, Container), 'doc': 'the Container(s) to set parent(s) for'},
+    def set_as_parent(self, **kwargs):
+        container = getargs('container', kwargs)
+        set_parents(container, self)
 
 
 @register_class('NWBData', CORE_NAMESPACE)
