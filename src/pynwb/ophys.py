@@ -80,6 +80,7 @@ class ImagingPlane(NWBContainer):
         pargs, pkwargs = fmt_docval_args(super(ImagingPlane, self).__init__, kwargs)
         super(ImagingPlane, self).__init__(*pargs, **pkwargs)
         self.optical_channel = optical_channel if isinstance(optical_channel, list) else [optical_channel]
+        self.set_as_parent(self.optical_channel)
         self.description = description
         self.device = device
         self.excitation_lambda = excitation_lambda
@@ -219,6 +220,7 @@ class PlaneSegmentation(NWBContainer):
         super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
         self.description = description
         self.roi_list = roi_list
+        self.set_as_parent(self.roi_list)
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
 
@@ -252,6 +254,7 @@ class ImageSegmentation(NWBContainer):
         pargs, pkwargs = fmt_docval_args(super(ImageSegmentation, self).__init__, kwargs)
         super(ImageSegmentation, self).__init__(*pargs, **pkwargs)
         self.plane_segmentations = plane_segmentations
+        self.set_as_parent(plane_segmentations)
 
 
 @register_class('RoiResponseSeries', CORE_NAMESPACE)
@@ -304,6 +307,7 @@ class RoiResponseSeries(TimeSeries):
         super(RoiResponseSeries, self).__init__(*pargs, **pkwargs)
         self.roi_names = roi_names
         self.segmentation_interface = segmentation_interface
+        self.set_as_parent(segmentation_interface)
 
 
 @register_class('DfOverF', CORE_NAMESPACE)
@@ -326,6 +330,7 @@ class DfOverF(NWBContainer):
         pargs, pkwargs = fmt_docval_args(super(DfOverF, self).__init__, kwargs)
         super(DfOverF, self).__init__(*pargs, **pkwargs)
         self.roi_response_series = roi_response_series
+        self.set_as_parent(roi_response_series)
 
 
 @register_class('Fluorescence', CORE_NAMESPACE)
@@ -348,3 +353,4 @@ class Fluorescence(NWBContainer):
         pargs, pkwargs = fmt_docval_args(super(Fluorescence, self).__init__, kwargs)
         super(Fluorescence, self).__init__(*pargs, **pkwargs)
         self.roi_response_series = roi_response_series
+        self.set_as_parent(roi_response_series)
