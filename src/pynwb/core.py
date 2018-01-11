@@ -52,10 +52,9 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
             {'name': 'container_source', 'type': object,
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
-        container_source = getargs('parent', 'container_source', kwargs)
+        parent, container_source = getargs('parent', 'container_source', kwargs)
         super(NWBBaseType, self).__init__(parent)
         self.__fields = dict()
-        self.__parent = None
         self.__name = getargs('name', kwargs)
         self.__container_source = container_source
 
@@ -137,7 +136,7 @@ class NWBContainer(NWBBaseType, Container):
                 return_dict[i.name] = i
             return return_dict
 
-    @docval({'name': 'container', 'type': (list, Container), 'doc': 'the Container(s) to set parent(s) for'},
+    @docval({'name': 'container', 'type': (Iterable, Container), 'doc': 'the Container(s) to set parent(s) for'})
     def set_as_parent(self, **kwargs):
         container = getargs('container', kwargs)
         set_parents(container, self)

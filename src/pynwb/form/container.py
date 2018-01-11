@@ -1,5 +1,6 @@
 import abc
 from six import with_metaclass
+from .utils import docval, getargs
 
 
 class Container(with_metaclass(abc.ABCMeta, object)):
@@ -8,6 +9,7 @@ class Container(with_metaclass(abc.ABCMeta, object)):
              'doc': 'the parent Container for this Container', 'default': None})
     def __init__(self, **kwargs):
         parent = getargs('parent', kwargs)
+        self.__parent = None
         if parent:
             self.parent = parent
 
