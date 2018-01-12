@@ -5,6 +5,7 @@ from pynwb.ophys import (
     OpticalChannel,
     TwoPhotonSeries
 )
+from pynwb.ecephys import Device
 
 from . import base
 
@@ -17,8 +18,9 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
     def setUpContainer(self):
         self.optical_channel = OpticalChannel('optchan1', 'unit test TestImagingPlaneIO',
                                               'a fake OpticalChannel', '3.14')
+        self.imaging_device = Device('imaging_device_1', 'test_ophys unit tests')
         return ImagingPlane('imgpln1', 'unit test TestImagingPlaneIO', self.optical_channel,
-                            'a fake ImagingPlane', 'imaging_device_1', '6.28', '2.718', 'GFP', 'somewhere in the brain')
+                            'a fake ImagingPlane', self.imaging_device, '6.28', '2.718', 'GFP', 'somewhere in the brain')
 
     def setUpBuilder(self):
         optchan_builder = GroupBuilder(
@@ -32,6 +34,11 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
                 'description': DatasetBuilder('description', 'a fake OpticalChannel'),
                 'emission_lambda': DatasetBuilder('emission_lambda', '3.14')},
         )
+        device_builder = GroupBuilder('imaging_device_1',
+                                      attributes={'neurodata_type': 'Device',
+                                                  'namespace': 'core',
+                                                  'help': 'A recording device e.g. amplifier',
+                                                  'source': 'test_ophys unit tests'})
         return GroupBuilder(
             'imgpln1',
             attributes={
@@ -41,18 +48,21 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
                 'help': 'Metadata about an imaging plane'},
             datasets={
                 'description': DatasetBuilder('description', 'a fake ImagingPlane'),
-                'device': DatasetBuilder('device', 'imaging_device_1'),
                 'excitation_lambda': DatasetBuilder('excitation_lambda', '6.28'),
                 'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
             groups={
                 'optchan1': optchan_builder
+            },
+            links={
+                'device': LinkBuilder('device', device_builder),
             }
         )
 
     def addContainer(self, nwbfile):
         """Should take an NWBFile object and add the container to it"""
+        nwbfile.set_device(self.imaging_device)
         nwbfile.set_imaging_plane(self.container)
 
     def getContainer(self, nwbfile):
@@ -62,9 +72,10 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
 
 def make_imaging_plane(self, source):
     self.optical_channel = OpticalChannel('optchan1', source, 'a fake OpticalChannel', '3.14')
+    self.imaging_device = Device('imaging_device_1', 'test_ophys unit tests')
     self.imaging_plane = ImagingPlane('imgpln1', source, self.optical_channel,
                                       'a fake ImagingPlane',
-                                      'imaging_device_1', '6.28', '2.718', 'GFP', 'somewhere in the brain')
+                                      self.imaging_device, '6.28', '2.718', 'GFP', 'somewhere in the brain')
 
 
 class TestTwoPhotonSeries(base.TestMapRoundTrip):
@@ -91,6 +102,11 @@ class TestTwoPhotonSeries(base.TestMapRoundTrip):
                  'description': DatasetBuilder('description', 'a fake OpticalChannel'),
                  'emission_lambda': DatasetBuilder('emission_lambda', '3.14')},
         )
+        device_builder = GroupBuilder('imaging_device_1',
+                                      attributes={'neurodata_type': 'Device',
+                                                  'namespace': 'core',
+                                                  'help': 'A recording device e.g. amplifier',
+                                                  'source': 'test_ophys unit tests'})
         imgpln_builder = GroupBuilder(
             'imgpln1',
             attributes={
@@ -100,13 +116,15 @@ class TestTwoPhotonSeries(base.TestMapRoundTrip):
                 'source': 'unit test TestTwoPhotonSeries'},
             datasets={
                 'description': DatasetBuilder('description', 'a fake ImagingPlane'),
-                'device': DatasetBuilder('device', 'imaging_device_1'),
                 'excitation_lambda': DatasetBuilder('excitation_lambda', '6.28'),
                 'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
             groups={
                 'optchan1': optchan_builder
+            },
+            links={
+                'device': LinkBuilder('device', device_builder),
             }
         )
 
@@ -143,5 +161,6 @@ class TestTwoPhotonSeries(base.TestMapRoundTrip):
 
     def addContainer(self, nwbfile):
         """Should take an NWBFile object and add the container to it"""
+        nwbfile.set_device(self.imaging_device)
         nwbfile.set_imaging_plane(self.imaging_plane)
         nwbfile.add_acquisition(self.container)
