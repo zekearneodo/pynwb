@@ -187,9 +187,6 @@ groups:
     dtype: text
     name: description
     quantity: '?'
-  - doc: Name of device in /general/devices
-    dtype: text
-    name: device
   - doc: Excitation wavelength
     dtype: text
     name: excitation_lambda
@@ -253,6 +250,11 @@ groups:
       is arbitrary but should be meaningful'
     neurodata_type_def: OpticalChannel
     neurodata_type_inc: NWBContainer
+  links:
+  - doc: the device that was used for recording from this imaging plane
+    name: device
+    quantity: '?'
+    target_type: Device
   neurodata_type_def: ImagingPlane
   neurodata_type_inc: NWBContainer
   quantity: '*'
