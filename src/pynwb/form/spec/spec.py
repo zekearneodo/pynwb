@@ -967,7 +967,7 @@ class GroupSpec(BaseStorageSpec):
     def add_dataset(self, **kwargs):
         ''' Add a new specification for a dataset to this group specification '''
         doc = kwargs.pop('doc')
-        spec = DatasetSpec(doc, **kwargs)
+        spec = self.dataset_spec_cls()(doc, **kwargs)
         self.set_dataset(spec)
         return spec
 
@@ -976,7 +976,7 @@ class GroupSpec(BaseStorageSpec):
         ''' Add the given specification for a dataset to this group specification '''
         spec = getargs('spec', kwargs)
         if spec.parent is not None:
-            spec = DatasetSpec.build_spec(spec)
+            spec = self.dataset_spec_cls().build_spec(spec)
         if spec.name == NAME_WILDCARD:
             if spec.data_type_inc is not None or spec.data_type_def is not None:
                 self.__add_data_type_inc(spec)
